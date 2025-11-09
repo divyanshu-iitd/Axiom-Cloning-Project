@@ -10,6 +10,7 @@ interface TokenCardProps {
   token: Token;
   previousPrice?: number;
   priceDirection?: "up" | "down";
+  flashColor?: "green" | "red" | null;
   onTokenClick?: (token: Token) => void;
 }
 
@@ -18,18 +19,22 @@ interface TokenCardProps {
  * Layout: LEFT (avatar + name + icons) | MIDDLE (metrics) | RIGHT (price)
  */
 export const TokenCard = React.memo<TokenCardProps>(
-  ({ token, previousPrice, priceDirection, onTokenClick }) => {
+  ({ token, previousPrice, priceDirection, flashColor, onTokenClick }) => {
     const [isHovered, setIsHovered] = React.useState(false);
     const [flashClass, setFlashClass] = React.useState<string>("");
 
     // Flash animation on price change
     React.useEffect(() => {
-      if (priceDirection && previousPrice !== undefined) {
+      if (flashColor) {
+        setFlashClass(flashColor === "green" ? "flash-green" : "flash-red");
+        const timer = setTimeout(() => setFlashClass(""), 200);
+        return () => clearTimeout(timer);
+      } else if (priceDirection && previousPrice !== undefined) {
         setFlashClass(priceDirection === "up" ? "flash-green" : "flash-red");
         const timer = setTimeout(() => setFlashClass(""), 200);
         return () => clearTimeout(timer);
       }
-    }, [priceDirection, previousPrice]);
+    }, [flashColor, priceDirection, previousPrice]);
 
     const handleClick = React.useCallback(() => {
       onTokenClick?.(token);
